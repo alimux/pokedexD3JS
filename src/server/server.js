@@ -61,7 +61,7 @@ MongoClient.connect("mongodb://localhost/pokedex", function(error, db)
 						var name_index = {};
 						name_index["nodes"] = 0;
 						var SEUIL_MAX = 150;
-						//var tempLinksRoot = { source : name_index["nodes"], target : 0, value : "100" };
+						//var tempLinksRoot = { source : name_index[d.typePokemon], target : 0, value : "100" };
 						//forceJson.links.push(tempLinksRoot);
 
 						results2.forEach(function(d, i)
@@ -72,6 +72,8 @@ MongoClient.connect("mongodb://localhost/pokedex", function(error, db)
 
 							});
 
+						var countNode = results2.length + 1;
+
 						results2.forEach(function(d, i)
 						{
 
@@ -81,14 +83,15 @@ MongoClient.connect("mongodb://localhost/pokedex", function(error, db)
        										 defense : d.defense, spAtk : d.spAtk, spDef : d.spDef, speed : d.speed, total : d.total,
        										 imageEvo1 : d.imageEvo1, nivEvo1 : d.nivEvo1, imageEvo2 : d.imageEvo2, nivEvo2 : d.nivEvo2, imageEvo3 : d.imageEvo3 
        										} ;
+
 							//console.log(tempNode);
+							//console.log(results2.length);
 							forceJson.nodes.push(tempNode);
 
-							//var tempLinksRoot = { source : name_index[d.typePokemon], target : 0, value : "100" };
-							//forceJson.links.push(tempLinksRoot);
 							var tempLinksType = { source : name_index[d.pokemonName], target : name_index[d.typePokemon], value : d.hp }
-							
 							forceJson.links.push(tempLinksType);
+							//var tempLinksRoot = { source : name_index[d.typePokemon], target : countNode, value : "100" };
+							//forceJson.links.push(tempLinksRoot);
 
 
 						});
@@ -101,7 +104,7 @@ MongoClient.connect("mongodb://localhost/pokedex", function(error, db)
 				}
 
 		
-		//hierachyNodes(collection);
+		hierachyNodes(collection);
 		//console.log("affichage de la fonction hierarchy : "+hierachyNodes());
 
 		});

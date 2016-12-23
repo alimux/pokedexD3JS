@@ -1,114 +1,83 @@
 /* script force layout d3.js v0.1 */
 var file ="json/pokemonDatas.json";
 
-//size definition of the "window"
-var margin = {top: -5, right: -5, bottom: -5, left: -5},
-    width = 1200 - margin.left - margin.right,
-    height = 600 - margin.top - margin.bottom;
-
-var root;
-
-
-//append the div tag -> window pokedex
-var svg = d3.select("#pokedex")
-			.append("svg")
-			.attr("width", width + margin.left + margin.right)
-      .attr("height", height + margin.top + margin.bottom)
-      .attr("transform", "translate(" + margin.left + "," + margin.right + ")")
-      .call(d3.behavior.zoom().on("zoom", zoom))
-
- function zoom() {
-        svg.attr("transform", "translate(" + d3.event.translate + ")scale(" + d3.event.scale + ")");
-    }
-//svg.style("cursor","move");
-
-//init of d3 force
-var force;
-var pokemonInfoDiv = d3.select("#pokemonInfo");
-//init color
-var colScale = d3.scale.category20();
 
 
 function update(nodes, links)
 	{
 
-		force = d3.layout.force()
-		.nodes(d3.values(nodes))
-		.links(d3.values(links))
-		.size([width, height])
-		.linkDistance(50)
-		.charge(-60)
-    .gravity(.10)
-		.on("tick",tick)
-		.start();
+		//size definition of the "window"
+		var margin = {top: -5, right: -5, bottom: -5, left: -5},
+   			width = 1200 - margin.left - margin.right,
+    		height = 600 - margin.top - margin.bottom;
 
-    var drag = d3.behavior.drag()
-        .origin(function(d) { return d; })
-        .on("dragstart", dragstarted)
-        .on("drag", dragged)
-        .on("dragend", dragended);
-    
+		//init of d3 force
+		var force;
+
+		var pokemonInfoDiv = d3.select("#pokemonInfo");
+
+		//init color
+		var colScale = d3.scale.category20();
+
+		//append the div tag
+		var svg = d3.select("#pokedex")
+			.append("svg")
+			.attr("width", width + margin.left + margin.right)
+      		.attr("height", height + margin.top + margin.bottom)
+      		.append("g")
+      		.call(d3.behavior.zoom().scaleExtent([1, 20]).on("zoom", zoom))
+      		.append("g");
+
+      		svg.style("cursor","move");
+
+      		//append rectangle for pan
+      		svg.append("rect")
+    		.attr("class", "overlay")
+    		.attr("width", width)
+    		.attr("height", height);
+
+		force = d3.layout.force()
+				.nodes(d3.values(nodes))
+				.links(d3.values(links))
+				.size([width, height])
+				.linkDistance(50)
+				.charge(-350)
+   				.gravity(.50)
+				.on("tick",tick)
+				.start();
 
 		var path = svg.append("svg:g").selectAll("path")
-    	 .data(force.links())
- 		   .enter().append("svg:path")
-   		 .attr("class", function(d) { return "link " ; })
-   		 ;
+    	 			.data(force.links())
+ 		   			.enter().append("line:path")
+   		 			.attr("class", function(d) { return "link " ; });
 
 		//draw circle
 		var circle = svg.append("svg:g").selectAll("circle")
-   		.data(force.nodes())
-		  .enter().append("svg:circle")
-		  .style("fill", function(d) { return colScale(d.cluster);})
-    	.attr("r", 8)
-    	.on("click", function(d) { showPokemonPanel(d); } )
-    	.call(force.drag);
+   					.data(force.nodes())
+					.enter().append("svg:circle")
+					.style("fill", function(d) { return colScale(d.cluster);})
+    				.attr("r", 8)
+    				.on("click", function(d) { showPokemonPanel(d); } )
+    				.call(force.drag);
 
     	//settings text
     	var text = svg.append("svg:g").selectAll("g")
-    	.data(force.nodes())
-  		.enter().append("svg:g");
+    				.data(force.nodes())
+  					.enter().append("svg:g");
 
 		// A copy of the text with a thick white stroke for legibility.
 		text.append("svg:text")
-    	.attr("x", 12)
-    	.attr("y", ".31em")
-   		.attr("class", "shadow")
-    	.text(function(d) { return d.pokemonName; });
+    		.attr("x", 12)
+    		.attr("y", ".31em")
+   			.attr("class", "shadow")
+    		.text(function(d) { return d.pokemonName; });
 
 		text.append("svg:text")
-   		 .attr("x", 12)
-   		 .attr("y", ".31em")
-   		 .text(function(d) { return d.pokemonName; });
+   			.attr("x", 12)
+   			.attr("y", ".31em")
+   			.text(function(d) { return d.pokemonName; });
 
-    var drag = d3.behavior.drag()
-        .origin(function(d) { return d; })
-        .on("dragstart", dragstarted)
-        .on("drag", dragged)
-        .on("dragend", dragended);
-
-
-    //test******************************************************************************************************************
-  
-     
-      function dragstarted(d) {
-        d3.event.sourceEvent.stopPropagation();
-        d3.select(this).classed("dragging", true);
-       }
-
-    function dragged(d) {
-        d3.select(this).attr("x", d.x = d3.event.x).attr("y", d.y = d3.event.y);
-     }
-
-    function dragended(d) {
-        d3.select(this).classed("dragging", false);
-     }
-
-   		 /*------------------------------------------------------------------------------------------------------------------------------
-       | Panel setting
-       |_______________________________________________________________________________________________________________________________*/
-       
-       	//show panel
+   		 	//show panel
    		function showPokemonPanel( node ) 
    			{
    				console.log(node, nodes);
@@ -116,8 +85,11 @@ function update(nodes, links)
 				.html( getPokemonInfo(node,nodes) )
 				.attr("class","panel_on");
     		}
+   		 /*------------------------------------------------------------------------------------------------------------------------------
+       | Panel setting
+       |_______________________________________________________________________________________________________________________________*/
 
-    		//panel information
+       //Information panel
     	function getPokemonInfo( n, nodes ) 
     		{
     			console.log( "INFO", n );
@@ -130,32 +102,30 @@ function update(nodes, links)
     			info += '<div class=f><span class=l>Japanese Name :</span>: <span class=g>' + n.japaneseName + '</span></div>';
     			info += '<div class=f><span class=l>Pokemon type :</span>: <span class=g>' + n.typePokemon + '</span></div>';
     			info += '<div class=f><span class=l> Species :</span>: <span class=g>' + n.species + '</span></div>';
-          info += '<div class=f><span class=l>Statistic : </span>: <span class=g> </span></div>';
-          info += '<div class=f><span class=l>Health points :</span>: <span class=g> ' + n.hp + '</span></div>';
-          info += '<div class=f><span class=l>Attack points :</span>: <span class=g> ' + n.attack + '</span></div>';
-          info += '<div class=f><span class=l>Defense points :</span>: <span class=g> ' + n.defense + '</span></div>';
-          info += '<div class=f><span class=l>Speed points :</span>: <span class=g> ' + n.speed + '</span></div>';
-
+        		info += '<div class=f><span class=l>Statistic : </span>: <span class=g> </span></div>';
+        		info += '<div class=f><span class=l>Health points :</span>: <span class=g> ' + n.hp + '</span></div>';
+        		info += '<div class=f><span class=l>Attack points :</span>: <span class=g> ' + n.attack + '</span></div>';
+        		info += '<div class=f><span class=l>Defense points :</span>: <span class=g> ' + n.defense + '</span></div>';
+        		info += '<div class=f><span class=l>Speed points :</span>: <span class=g> ' + n.speed + '</span></div>';
     			info += '</div>';
     			return info;
- 
 
     		}
 
-    		//panel close
+    	//Closing panel
     	 toggleDiv = function( id, status ) 
     	 	{
     			d = d3.select('div#'+id);
     			console.log( 'TOGGLE', id, d.attr('class'), '->', status );
     				if( status === undefined )
-      				status = d.attr('class') == 'panel_on' ? 'off' : 'on';
-  					  d.attr( 'class', 'panel_' + status );
+      					status = d.attr('class') == 'panel_on' ? 'off' : 'on';
+  						d.attr( 'class', 'panel_' + status );
     				return false;
   			}
-      /*________________________________________________________________________________________________________________________________*/
-   		 
 
-    	//translation points
+      /*________________________________________________________________________________________________________________________________*/   		 
+
+    	//translations points
     	function tick(e)
     		{
     			path.attr("d", function(d)
@@ -177,13 +147,54 @@ function update(nodes, links)
  				 });
     		}
 
+    	//zooming window
+    	function zoom()
+    		{
+    			svg.attr("transform", "translate(" + d3.event.translate + ")scale(" + d3.event.scale + ")");
+			}
+
+		 /*__________________________________________________________________________________________________________________________________
+		 |
+		 | search function
+		  ___________________________________________________________________________________________________________________________________*/
+  		
+		var optArray = [];
+		console.log("affichage nodes : "+d3.values(nodes).length);
+		for (var i = 0; i < d3.values(nodes).length - 1; i++) {
+   			optArray.push(d3.values(nodes)[i].pokemonName);
+   			//console.log("affichage resultat : "+d3.values(nodes)[i].pokemonName);
+		}
+
+		optArray = optArray.sort();
+		$(function () {
+		    $("#search").autocomplete({
+		        source: optArray
+		    });
+		});
+
+		function searchNode() {
+		    //find the node
+		    var selectedVal = document.getElementById('search').value;
+		    var node = svg.selectAll(".node");
+		    if (selectedVal == "none") {
+		        node.style("stroke", "white").style("stroke-width", "1");
+		    } else {
+		        var selected = node.filter(function (d, i) {
+		            return d.name != selectedVal;
+		        });
+		        selected.style("opacity", "0");
+		        var link = svg.selectAll(".link")
+		        link.style("opacity", "0");
+		        d3.selectAll(".node, .link").transition()
+		            .duration(5000)
+		            .style("opacity", 1);
+		    }
+		}
+
 
 	}
 
-/*________________________________________________
-|
-| Datas source
-|_________________________________________________*/
+
 
 d3.json(file, function(error, data){
 	
@@ -191,8 +202,12 @@ d3.json(file, function(error, data){
 
     var linkArray = data.links;
 	netClustering.cluster(data.nodes, data.links);
+	var test = update(data.nodes, linkArray);
+	console.log("test : "+test.searchNode);
 
-    update(data.nodes, linkArray);
+   
+
+		
 
 });
 
