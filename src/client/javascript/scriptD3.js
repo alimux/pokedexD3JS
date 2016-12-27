@@ -80,7 +80,7 @@ function update(nodes, links)
    		 	//show panel
    		function showPokemonPanel( node ) 
    			{
-   				console.log(node, nodes);
+   				console.log("node : " + node,+" nodes : "+nodes);
    				pokemonInfoDiv
 				.html( getPokemonInfo(node,nodes) )
 				.attr("class","panel_on");
@@ -158,34 +158,64 @@ function update(nodes, links)
 		 | search function
 		  ___________________________________________________________________________________________________________________________________*/
   		
-		var optArray = [];
+
+		//add search form
+		var divSearch = document.querySelector('#searchEngine');
+		var addSearchEngine = "<div class=\"row center\">"; 
+            addSearchEngine +="		<div class=\"col s4 offset-s4\">";
+            addSearchEngine +="         <div class=\"input-field col s12\">";
+            addSearchEngine +="            <div class=\"ui-widget\">";
+            addSearchEngine +="            <i class=\"material-icons prefix\">textsms</i>";
+            addSearchEngine +="            <input id=\"search\" >";
+            addSearchEngine +="            <button id=\"button\" type=\"button\" onclick=\"true\">Search</button>";
+            addSearchEngine +="          </div>";
+            addSearchEngine +="        </div>";
+            addSearchEngine +="      </div>";
+            addSearchEngine +="    </div>";
+
+        //adding on html
+        divSearch.innerHTML = addSearchEngine;
+
+        //Retrieve state of button / laucnch search function
+        var stateButton = document.getElementById('button');
+        stateButton.addEventListener('click', function(){
+        	searchNode();
+        });
+
+        var optArray = [];
 		console.log("affichage nodes : "+d3.values(nodes).length);
 		for (var i = 0; i < d3.values(nodes).length - 1; i++) {
    			optArray.push(d3.values(nodes)[i].pokemonName);
    			//console.log("affichage resultat : "+d3.values(nodes)[i].pokemonName);
 		}
-
+		
+		//sorting Array
 		optArray = optArray.sort();
+
 		$(function () {
+			//console.log("Liste Search : "+optArray);
 		    $("#search").autocomplete({
 		        source: optArray
 		    });
 		});
+		//console.log("essai : "+$('#search').autocomplete)
 
+        //search function & autocomplete
 		function searchNode() {
 		    //find the node
+		    console.log("in Search");
 		    var selectedVal = document.getElementById('search').value;
-		    var node = svg.selectAll(".node");
+		    var node = svg.selectAll("circle");
 		    if (selectedVal == "none") {
 		        node.style("stroke", "white").style("stroke-width", "1");
 		    } else {
 		        var selected = node.filter(function (d, i) {
-		            return d.name != selectedVal;
+		            return d.pokemonName != selectedVal;
 		        });
 		        selected.style("opacity", "0");
 		        var link = svg.selectAll(".link")
 		        link.style("opacity", "0");
-		        d3.selectAll(".node, .link").transition()
+		        d3.selectAll("circle, .link").transition()
 		            .duration(5000)
 		            .style("opacity", 1);
 		    }
@@ -203,7 +233,7 @@ d3.json(file, function(error, data){
     var linkArray = data.links;
 	netClustering.cluster(data.nodes, data.links);
 	var test = update(data.nodes, linkArray);
-	console.log("test : "+test.searchNode);
+	//console.log("test : "+test.searchNode);
 
    
 
